@@ -34,11 +34,11 @@ class Network:
         else:
             self.weightsHiddenToOutput = weightsHToO
 
-    def forwardPropagation(self, X):
+    def forwardPropagation(self, input):
         bias = 0
         if self.ifBias is True:
             bias = 1
-        self.z = np.dot(X, self.weightsInputToHidden) + bias  # dot product of input and first set of weights
+        self.z = np.dot(input, self.weightsInputToHidden) + bias  # dot product of input and first set of weights
         self.z2 = _sigmoid(self.z)  # activation function
         self.z3 = np.dot(self.z2, self.weightsHiddenToOutput) + bias  # dot product of hidden layer and second set of weights
         output = _sigmoid(self.z3)
