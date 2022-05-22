@@ -59,7 +59,7 @@ class Network:
 
         self.counterBackward += 1
 
-    def train(self, X, y):
-        output = self.forwardPropagation(X)
-        self.backwardPropagation(X, y, output)
+    def train(self, input, expected):
+        output = self.forwardPropagation(input)
+        self.backwardPropagation(input, expected, output)
 
