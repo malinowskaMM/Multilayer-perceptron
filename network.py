@@ -29,7 +29,7 @@ class Network:
         else:
             self.weightsInputToHidden = weightsIToH
 
-        if weightsIToH is None:
+        if weightsHToO is None:
             self.weightsHiddenToOutput = np.random.rand(self.inputNumber, self.hiddenNumber)
         else:
             self.weightsHiddenToOutput = weightsHToO
