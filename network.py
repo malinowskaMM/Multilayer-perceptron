@@ -12,6 +12,7 @@ class Network:
     # weightsIToH - wektor wag z warstwy wejściowej do warstwy ukrytej
     # weightsHToO - wektor wag z warstwy ukrytej do wartwy wyjściowej
     def __init__(self, inputNumber, hiddenNumber, outputNumber, weightsIToH, weightsHToO, bias=False):
+        self. counterBackward = 1
         self.ifBias = bias
         self.z2Delta = None
         self.z2Error = None
@@ -46,15 +47,17 @@ class Network:
 
     # from wikipedia
 
-    def backwardPropagation(self, X, y, output):
-        self.outputError = y - output
+    def backwardPropagation(self, input, expected, output):
+        self.outputError = expected - output
         self.outputDelta = self.outputError * _sigmoid(output, deriv=True)
 
         self.z2Error = self.outputDelta.dot(self.weightsHiddenToOutput.T)
         self.z2Delta = self.z2Error * _sigmoid(self.z2, deriv=True)
 
-        self.weightsInputToHidden += X.T.dot(self.z2Delta)
-        self.weightsHiddenToOutput += self.z2.T.dot(self.outputDelta)
+        self.weightsInputToHidden += self.counterBackward * input.T.dot(self.z2Delta)
+        self.weightsHiddenToOutput += self.counterBackward * self.z2.T.dot(self.outputDelta)
+
+        self.counterBackward += 1
 
     def train(self, X, y):
         output = self.forwardPropagation(X)
