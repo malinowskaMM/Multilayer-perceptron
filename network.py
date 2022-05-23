@@ -48,6 +48,8 @@ class Network:
     # from wikipedia
 
     def backwardPropagation(self, input, expected, output):
+        print("input", self.weightsInputToHidden)
+        print("output", self.weightsHiddenToOutput)
         self.outputError = expected - output
         self.outputDelta = self.outputError * _sigmoid(output, deriv=True)
 
