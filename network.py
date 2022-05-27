@@ -1,9 +1,11 @@
 import numpy as np
 
+
 def _sigmoid(x, deriv=False):
     if deriv is True:
-        return np.exp(x)/((np.exp(x) + 1)**2) # pochodna funkcji aktywacji
-    return 1 / (1 + np.exp(-x)) # funkcja aktywacji - sigmoida
+        return x * (1 - x)  # pochodna funkcji aktywacji
+    return 1 / (1 + np.exp(-x))  # funkcja aktywacji - sigmoida
+
 
 class Network:
     # inputNumber - ilosc neuronów wejściowych,
@@ -11,57 +13,67 @@ class Network:
     # outputNumber - ilość neuronów wyjściowych
     # weightsIToH - wektor wag z warstwy wejściowej do warstwy ukrytej
     # weightsHToO - wektor wag z warstwy ukrytej do wartwy wyjściowej
-    def __init__(self, inputNumber, hiddenNumber, outputNumber, weightsIToH, weightsHToO, bias=False):
-        self. counterBackward = 1
-        self.ifBias = bias
-        self.z2Delta = None
-        self.z2Error = None
-        self.outputDelta = None
-        self.outputError = None
-        self.z3 = None
-        self.z2 = None
-        self.z = None
+    def __init__(self, inputNumber, hiddenNumber, outputNumber, weightsIToH, weightsHToO, biasChooser=False):
+        self.counterBackward = 1
+        self.ifBias = biasChooser
         self.inputNumber = inputNumber
         self.hiddenNumber = hiddenNumber
         self.outputNumber = outputNumber
 
-        if weightsIToH is None:
+        if weightsIToH is None:  # tablica input na hidden - każde wejście ma swoją wagę idąc do danego węzła
             self.weightsInputToHidden = np.random.rand(self.inputNumber, self.hiddenNumber)
         else:
             self.weightsInputToHidden = weightsIToH
 
         if weightsHToO is None:
-            self.weightsHiddenToOutput = np.random.rand(self.inputNumber, self.hiddenNumber)
+            self.weightsHiddenToOutput = np.random.rand(self.hiddenNumber, self.outputNumber)
         else:
             self.weightsHiddenToOutput = weightsHToO
 
     def forwardPropagation(self, input):
-        bias = 0
-        if self.ifBias is True:
-            bias = 1
-        self.z = np.dot(input, self.weightsInputToHidden) + bias  # dot product of input and first set of weights
-        self.z2 = _sigmoid(self.z)  # activation function
-        self.z3 = np.dot(self.z2, self.weightsHiddenToOutput) + bias  # dot product of hidden layer and second set of weights
-        output = _sigmoid(self.z3)
-        return output
+        #signle row contains weights for one hidden neuron
+        productOfWeightsAndInput = np.copy(self.weightsInputToHidden)
+        for row in range(len(productOfWeightsAndInput)):
+            productOfWeightsAndInput[row] *= input[row]
 
-    # from wikipedia
+        #sum of hidden neuron is a sum of values in single column
+        sumOfWeightsInputProduct = np.sum(productOfWeightsAndInput, axis=0)
 
-    def backwardPropagation(self, input, expected, output):
-        print("input", self.weightsInputToHidden)
-        print("output", self.weightsHiddenToOutput)
-        self.outputError = expected - output
-        self.outputDelta = self.outputError * _sigmoid(output, deriv=True)
+        #for each sum we use sigmoid function
+        sigmoidSumOfWeightsInputProduct = np.copy(sumOfWeightsInputProduct)
+        for sum in range(len(sigmoidSumOfWeightsInputProduct)):
+            sigmoidSumOfWeightsInputProduct[sum] = _sigmoid(sigmoidSumOfWeightsInputProduct[sum])
 
-        self.z2Error = self.outputDelta.dot(self.weightsHiddenToOutput.T)
-        self.z2Delta = self.z2Error * _sigmoid(self.z2, deriv=True)
+        ##signle row contains weights for one output neuron
+        productOfWeightsAndHidden = np.copy(self.weightsHiddenToOutput)
+        for element in range(len(productOfWeightsAndHidden)):
+            productOfWeightsAndHidden[element] *= sigmoidSumOfWeightsInputProduct[element]
 
-        self.weightsInputToHidden += self.counterBackward * input.T.dot(self.z2Delta)
-        self.weightsHiddenToOutput += self.counterBackward * self.z2.T.dot(self.outputDelta)
+        # sum of output neuron is a sum of values in single column
+        sumOfWeightsHiddenProduct = np.sum(productOfWeightsAndHidden, axis=0)
 
-        self.counterBackward += 1
+        # for each sum we use sigmoid function
+        sigmoidSumOfWeightsHiddenProduct = np.copy(sumOfWeightsHiddenProduct)
+        for sum in range(len(sigmoidSumOfWeightsHiddenProduct)):
+            sigmoidSumOfWeightsHiddenProduct[sum] = _sigmoid(sigmoidSumOfWeightsHiddenProduct[sum])
+        #print(self.weightsInputToHidden)
+        #print(productOfWeightsAndInput)
+        #print(sumOfWeightsInputProduct)
+        #print(sigmoidSumOfWeightsInputProduct)
+        #print(self.weightsHiddenToOutput)
+        #print(productOfWeightsAndHidden)
+        #print(sumOfWeightsHiddenProduct)
+        #print(sigmoidSumOfWeightsHiddenProduct)
 
-    def train(self, input, expected):
-        output = self.forwardPropagation(input)
-        self.backwardPropagation(input, expected, output)
 
+
+    # def backwardPropagation(self, input, expected, output):
+
+    # def train(self, input, expected):
+    # output = self.forwardPropagation(input)
+    # self.backwardPropagation(input, expected, output)
+
+
+o = Network(4, 2, 2, None, None)
+table = np.array([2, 3, 4, 5])
+o.forwardPropagation(table)
