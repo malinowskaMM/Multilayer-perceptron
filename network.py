@@ -107,7 +107,7 @@ class Network:
                 modifyInputToHiddenWeights[weightRowIter][weightColIter] *= sumOfWeightsHiddenProduct[weightColIter%2]
                 modifyInputToHiddenWeights[weightRowIter][weightColIter] *= self.weightsInputToHidden[weightRowIter][weightColIter]
 
-        self.weightsInputToHidden -= modifyInputToHiddenWeights
+        self.weightsInputToHidden -= modifyInputToHiddenWeights #*alpha
         #print(self.weightsInputToHidden)
 
 
@@ -120,11 +120,18 @@ class Network:
     # self.backwardPropagation(input, expected, output)
 
 
-o = Network(4, 5, 4, None, None)
-table = np.array([2, 3, 4, 5])
-ex = np.array(([0.5, 0.9, 0.15, 0.88]))
+o = Network(9, 12, 9, None, None)
+table = np.array([2, 5, 6, 8, 11, 22, 9, 18, 1])
+ex = np.array([1, 0, 0, 0, 0, 0, 0, 0, 0 ])
 
 for i in range(500):
     outputForward = o.forwardPropagation(table)
     print(outputForward)
     o.backwardPropagation(table, ex, outputForward, None)
+
+
+
+table1 = np.array([8, 13, 89, 6, 7, 2, 55, 4, 1])
+outputForward = o.forwardPropagation(table1)
+print("-------------")
+print(outputForward)
