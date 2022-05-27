@@ -8,9 +8,8 @@ def _sigmoid(x, deriv=False):
 
 def _sum(outputForward, expected ,deriv=False):
     errorSum = 0
-    if deriv is True:
-        for i in range(len(outputForward)):
-            errorSum += (expected[i] - outputForward[i]) * (-1)
+    if deriv is True: #outputForward and expected as number not array
+        errorSum += (expected - outputForward) * (-1)
         return errorSum
     for i in range(len(outputForward)):
         errorSum += (expected[i] - outputForward[i]) ** 2
@@ -21,11 +20,12 @@ def _backCalculations(weights, outputForward, expected):
     modifyWeights = np.copy(weights)
     for weightRowIter in range(len(modifyWeights)):
         for weightColIter in range(len(modifyWeights[0])):
-            modifyWeights[weightRowIter][weightColIter] = _sum(
-                outputForward[weightRowIter][weightColIter], expected[weightRowIter][weightColIter], True)
-            modifyWeights[weightRowIter][weightColIter] *= _sigmoid(
-                outputForward[weightRowIter][weightColIter], True)
-            modifyWeights[weightRowIter][weightColIter] *= outputForward[weightRowIter][weightColIter]
+            modifyWeights[weightRowIter][weightColIter] = _sum(outputForward[weightColIter], expected[weightColIter], True)
+            #print(modifyWeights[weightRowIter][weightColIter])
+            modifyWeights[weightRowIter][weightColIter] *= _sigmoid(outputForward[weightColIter], True)
+            #print(modifyWeights[weightRowIter][weightColIter])
+            modifyWeights[weightRowIter][weightColIter] *= outputForward[weightColIter]
+            #print(modifyWeights[weightRowIter][weightColIter])
     return modifyWeights
 
 
@@ -80,14 +80,14 @@ class Network:
         for sumIter in range(len(sigmoidSumOfWeightsHiddenProduct)):
             sigmoidSumOfWeightsHiddenProduct[sumIter] = _sigmoid(sigmoidSumOfWeightsHiddenProduct[sumIter])
 
-        #print(self.weightsInputToHidden)
-        #print(productOfWeightsAndInput)
-        #print(sumOfWeightsInputProduct)
-        #print(sigmoidSumOfWeightsInputProduct)
-        #print(self.weightsHiddenToOutput)
-        #print(productOfWeightsAndHidden)
-        #print(sumOfWeightsHiddenProduct)
-        #print(sigmoidSumOfWeightsHiddenProduct)
+        '''print(self.weightsInputToHidden)
+        print(productOfWeightsAndInput)
+        print(sumOfWeightsInputProduct)
+        print(sigmoidSumOfWeightsInputProduct)
+        print(self.weightsHiddenToOutput)
+        print(productOfWeightsAndHidden)
+        print(sumOfWeightsHiddenProduct)
+        print(sigmoidSumOfWeightsHiddenProduct)'''
         output = sigmoidSumOfWeightsHiddenProduct
         return output
 
@@ -96,10 +96,20 @@ class Network:
     #alpha - step length coefficient
     def backwardPropagation(self, input, expected, outputForward, alpha):
         #calculate sum of errors (global error) between expected and output
-        errorSum = _sum(outputForward ,expected)
+        errorSum = _sum(outputForward, expected)
+        #print(errorSum)
 
-        #weights modifications
-        self.weightsHiddenToOutput = np.copy(_backCalculations(self.weightsHiddenToOutput, outputForward, expected))
+        #weights hidden to output modifications
+        self.weightsHiddenToOutput += _backCalculations(self.weightsHiddenToOutput, outputForward, expected)
+        #print(self.weightsHiddenToOutput)
+
+        # sum of output neuron is a sum of values in single column
+        sumOfWeightsHiddenProduct = np.sum(np.copy(self.weightsHiddenToOutput), axis=0)
+        #print(sumOfWeightsHiddenProduct)
+
+        #weights input to hidden modifications
+        self.weightsInputToHidden += _backCalculations(self.weightsInputToHidden, sumOfWeightsHiddenProduct, expected)
+        #print(self.weightsInputToHidden)
 
 
 
@@ -111,6 +121,10 @@ class Network:
     # self.backwardPropagation(input, expected, output)
 
 
-o = Network(4, 2, 2, None, None)
+o = Network(4, 2, 1, None, None)
 table = np.array([2, 3, 4, 5])
-o.forwardPropagation(table)
+ex = np.array(([0.14]))
+for i in range(30):
+    outputForward = o.forwardPropagation(table)
+    print(outputForward)
+    o.backwardPropagation(table, ex, outputForward, None)
