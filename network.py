@@ -16,20 +16,6 @@ def _sum(outputForward, expected ,deriv=False):
         errorSum /= 2
     return errorSum
 
-def _backCalculations(weights, outputForward, expected):
-    modifyWeights = np.copy(weights)
-    for weightRowIter in range(len(modifyWeights)):
-        for weightColIter in range(len(modifyWeights[0])):
-            modifyWeights[weightRowIter][weightColIter] = _sum(outputForward[weightColIter], expected[weightColIter], True)
-            #print(modifyWeights[weightRowIter][weightColIter])
-            modifyWeights[weightRowIter][weightColIter] *= _sigmoid(outputForward[weightColIter], True)
-            #print(modifyWeights[weightRowIter][weightColIter])
-            modifyWeights[weightRowIter][weightColIter] *= outputForward[weightColIter]
-            #print(modifyWeights[weightRowIter][weightColIter])
-    return modifyWeights
-
-
-
 class Network:
     # inputNumber - ilosc neuronów wejściowych,
     # hiddenNumber - ilość neuronów w warstwie ukrytej
@@ -94,21 +80,34 @@ class Network:
 
 
     #alpha - step length coefficient
-    def backwardPropagation(self, input, expected, outputForward, alpha):
+    def backwardPropagation(self, input, expected, outputForward, alpha = 1):
         #calculate sum of errors (global error) between expected and output
         errorSum = _sum(outputForward, expected)
         #print(errorSum)
 
         #weights hidden to output modifications
-        self.weightsHiddenToOutput -= _backCalculations(self.weightsHiddenToOutput, outputForward, expected)
-        #print(self.weightsHiddenToOutput)
+        modifyHiddenToOutputWeights = np.copy(self.weightsHiddenToOutput)
+        for weightRowIter in range(len(modifyHiddenToOutputWeights)):
+            for weightColIter in range(len(modifyHiddenToOutputWeights[0])):
+                modifyHiddenToOutputWeights[weightRowIter][weightColIter] = _sum(outputForward[weightColIter],expected[weightColIter], True)
+                modifyHiddenToOutputWeights[weightRowIter][weightColIter] *= _sigmoid(outputForward[weightColIter], True)
+                modifyHiddenToOutputWeights[weightRowIter][weightColIter] *= outputForward[weightColIter]
+
+        self.weightsHiddenToOutput -= modifyHiddenToOutputWeights
 
         # sum of output neuron is a sum of values in single column
         sumOfWeightsHiddenProduct = np.sum(np.copy(self.weightsHiddenToOutput), axis=0)
         #print(sumOfWeightsHiddenProduct)
 
         #weights input to hidden modifications
-        self.weightsInputToHidden -= _backCalculations(self.weightsInputToHidden, sumOfWeightsHiddenProduct, expected)
+        modifyInputToHiddenWeights = np.copy(self.weightsInputToHidden)
+        for weightRowIter in range(len(modifyInputToHiddenWeights)):
+            for weightColIter in range(len(modifyInputToHiddenWeights[0])):
+                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= _sigmoid(outputForward[weightColIter%2], True)
+                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= sumOfWeightsHiddenProduct[weightColIter%2]
+                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= self.weightsInputToHidden[weightRowIter][weightColIter]
+
+        self.weightsInputToHidden -= modifyInputToHiddenWeights
         #print(self.weightsInputToHidden)
 
 
@@ -121,10 +120,11 @@ class Network:
     # self.backwardPropagation(input, expected, output)
 
 
-o = Network(4, 2, 2, None, None)
+o = Network(4, 5, 4, None, None)
 table = np.array([2, 3, 4, 5])
-ex = np.array(([0.5, 0.9]))
-for i in range(100):
+ex = np.array(([0.5, 0.9, 0.15, 0.88]))
+
+for i in range(500):
     outputForward = o.forwardPropagation(table)
     print(outputForward)
     o.backwardPropagation(table, ex, outputForward, None)
