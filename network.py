@@ -100,7 +100,7 @@ class Network:
         #print(errorSum)
 
         #weights hidden to output modifications
-        self.weightsHiddenToOutput += _backCalculations(self.weightsHiddenToOutput, outputForward, expected)
+        self.weightsHiddenToOutput -= _backCalculations(self.weightsHiddenToOutput, outputForward, expected)
         #print(self.weightsHiddenToOutput)
 
         # sum of output neuron is a sum of values in single column
@@ -108,7 +108,7 @@ class Network:
         #print(sumOfWeightsHiddenProduct)
 
         #weights input to hidden modifications
-        self.weightsInputToHidden += _backCalculations(self.weightsInputToHidden, sumOfWeightsHiddenProduct, expected)
+        self.weightsInputToHidden -= _backCalculations(self.weightsInputToHidden, sumOfWeightsHiddenProduct, expected)
         #print(self.weightsInputToHidden)
 
 
@@ -121,10 +121,10 @@ class Network:
     # self.backwardPropagation(input, expected, output)
 
 
-o = Network(4, 2, 1, None, None)
+o = Network(4, 2, 2, None, None)
 table = np.array([2, 3, 4, 5])
-ex = np.array(([0.14]))
-for i in range(30):
+ex = np.array(([0.5, 0.9]))
+for i in range(100):
     outputForward = o.forwardPropagation(table)
     print(outputForward)
     o.backwardPropagation(table, ex, outputForward, None)
