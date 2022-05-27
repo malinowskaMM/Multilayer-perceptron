@@ -56,6 +56,7 @@ class Network:
         sigmoidSumOfWeightsHiddenProduct = np.copy(sumOfWeightsHiddenProduct)
         for sum in range(len(sigmoidSumOfWeightsHiddenProduct)):
             sigmoidSumOfWeightsHiddenProduct[sum] = _sigmoid(sigmoidSumOfWeightsHiddenProduct[sum])
+
         #print(self.weightsInputToHidden)
         #print(productOfWeightsAndInput)
         #print(sumOfWeightsInputProduct)
@@ -64,10 +65,21 @@ class Network:
         #print(productOfWeightsAndHidden)
         #print(sumOfWeightsHiddenProduct)
         #print(sigmoidSumOfWeightsHiddenProduct)
+        output = sigmoidSumOfWeightsHiddenProduct
+        return output
 
 
 
-    # def backwardPropagation(self, input, expected, output):
+    #alpha - step length coefficient
+    def backwardPropagation(self, input, expected, output, alpha):
+        #calculate sum of errors (global error) between expected and output
+        errorSum = 0
+        for i in range(len(input)):
+            errorSum += (expected[i] - output[i])**2
+        errorSum /= 2
+
+
+
 
     # def train(self, input, expected):
     # output = self.forwardPropagation(input)
