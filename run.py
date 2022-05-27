@@ -15,7 +15,7 @@ dataValues = data[:, :4]
 #cast values from str to float
 dataValues = np.asarray(dataValues, dtype=float)
 
-#
+
 trainingValues = dataValues[:25]
 trainingClasses = dataClass[:25]
 '''
