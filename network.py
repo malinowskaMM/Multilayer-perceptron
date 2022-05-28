@@ -28,12 +28,15 @@ class Network:
     # outputNumber - ilość neuronów wyjściowych
     # weightsIToH - wektor wag z warstwy wejściowej do warstwy ukrytej
     # weightsHToO - wektor wag z warstwy ukrytej do wartwy wyjściowej
-    def __init__(self, inputNumber, hiddenNumber, outputNumber, weightsIToH, weightsHToO, biasChooser=False):
+    def __init__(self, inputNumber, hiddenNumber, outputNumber, weightsIToH, weightsHToO, momentum, biasChooser=False):
         self.counterBackward = 1
         self.ifBias = biasChooser
         self.inputNumber = inputNumber
         self.hiddenNumber = hiddenNumber
         self.outputNumber = outputNumber
+        self.momentum = momentum
+        self.weightIToHIncrement = np.zeros((self.inputNumber, self.hiddenNumber))
+        self.weightHToOIncrement = np.zeros((self.hiddenNumber, self.outputNumber))
 
         if weightsIToH is None:  # tablica input na hidden - każde wejście ma swoją wagę idąc do danego węzła
             self.weightsInputToHidden = np.random.rand(self.inputNumber, self.hiddenNumber)
@@ -89,19 +92,22 @@ class Network:
 
 
     #alpha - step length coefficient
-    def backwardPropagation(self, input, expected, outputForward, alpha = 1):
+    def backwardPropagation(self, input, expected, outputForward, alpha = 0.6):
         #calculate sum of errors (global error) between expected and output
         errorSum = _sum(outputForward, expected)  #Cost function
 
         #weights hidden to output modifications
         modifyHiddenToOutputWeights = np.copy(self.weightsHiddenToOutput)
         deltaModifyHiddenToOutputWeights = np.copy(self.weightsHiddenToOutput)
-        for weightRowIter in range(len(modifyHiddenToOutputWeights)):
-            for weightColIter in range(len(modifyHiddenToOutputWeights[0])):
-                deltaModifyHiddenToOutputWeights[weightRowIter][weightColIter] *= _sum(outputForward[weightColIter], expected[weightColIter], True)
-                deltaModifyHiddenToOutputWeights[weightRowIter][weightColIter] *= _sigmoid(outputForward[weightColIter], True)
-                modifyHiddenToOutputWeights[weightRowIter][weightColIter] = deltaModifyHiddenToOutputWeights[weightRowIter][weightColIter]
-                modifyHiddenToOutputWeights[weightRowIter][weightColIter] *= self.sigmoidSumOfWeightsInputProduct[weightRowIter]
+        for rowIt in range(len(modifyHiddenToOutputWeights)):
+            for colIt in range(len(modifyHiddenToOutputWeights[0])):
+                deltaModifyHiddenToOutputWeights[rowIt][colIt] *= _sum(outputForward[colIt], expected[colIt], True)
+                deltaModifyHiddenToOutputWeights[rowIt][colIt] *= _sigmoid(outputForward[colIt], True)
+                modifyHiddenToOutputWeights[rowIt][colIt] = deltaModifyHiddenToOutputWeights[rowIt][colIt]
+                modifyHiddenToOutputWeights[rowIt][colIt] *= self.sigmoidSumOfWeightsInputProduct[rowIt]
+                tempModification = np.copy(modifyHiddenToOutputWeights[rowIt][colIt])
+                modifyHiddenToOutputWeights[rowIt][colIt] += self.momentum * self.weightHToOIncrement[rowIt][colIt]
+                self.weightHToOIncrement[rowIt][colIt] = tempModification
 
         sumDeltaModifyHiddenToOutputWeights = np.sum(deltaModifyHiddenToOutputWeights, axis = 1)
         self.weightsHiddenToOutput -= modifyHiddenToOutputWeights * alpha
@@ -111,11 +117,14 @@ class Network:
 
         #weights input to hidden modifications
         modifyInputToHiddenWeights = np.copy(self.weightsInputToHidden)
-        for weightRowIter in range(len(modifyInputToHiddenWeights)):
-            for weightColIter in range(len(modifyInputToHiddenWeights[0])):
-                modifyInputToHiddenWeights[weightRowIter][weightColIter] = _sigmoid(self.sigmoidSumOfWeightsInputProduct[weightColIter], True)
-                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= sumDeltaModifyHiddenToOutputWeights[weightColIter]
-                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= input[weightRowIter]
+        for rowIt in range(len(modifyInputToHiddenWeights)):
+            for colIt in range(len(modifyInputToHiddenWeights[0])):
+                modifyInputToHiddenWeights[rowIt][colIt] = _sigmoid(self.sigmoidSumOfWeightsInputProduct[colIt], True)
+                modifyInputToHiddenWeights[rowIt][colIt] *= sumDeltaModifyHiddenToOutputWeights[colIt]
+                modifyInputToHiddenWeights[rowIt][colIt] *= input[rowIt]
+                tempModification = np.copy(modifyInputToHiddenWeights[rowIt][colIt])
+                modifyInputToHiddenWeights[rowIt][colIt] += self.momentum * self.weightIToHIncrement[rowIt][colIt]
+                self.weightIToHIncrement[rowIt][colIt] = tempModification
 
 
         self.weightsInputToHidden -= modifyInputToHiddenWeights * alpha
@@ -127,4 +136,6 @@ class Network:
         for i in range(epochNum):
             for j in range(len(input)):
                 output = self.forwardPropagation(input[j])
+                globalError = _sum(output, _castClassNamesToZerosOnesArray(expected[j]))
+                print(globalError)
                 self.backwardPropagation(input[j],  _castClassNamesToZerosOnesArray(expected[j]), output)
