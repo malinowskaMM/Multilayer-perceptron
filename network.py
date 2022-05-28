@@ -38,12 +38,17 @@ class Network:
         else:
             self.weightsHiddenToOutput = weightsHToO
 
-    def forwardPropagation(self, input):
-        print(input)
+    def forwardPropagation(self, input, biasH=None, biasO=None):
+        if biasH is None:
+            biasH = np.zeros((self.inputNumber, self.hiddenNumber))
+        if biasO is None:
+            biasO = np.zeros((self.hiddenNumber, self.outputNumber))
+
         #signle row contains weights for one hidden neuron
         self.productOfWeightsAndInput = np.copy(self.weightsInputToHidden)
         for row in range(len(self.productOfWeightsAndInput)):
             self.productOfWeightsAndInput[row] *= input[row]
+            self.productOfWeightsAndInput[row] += biasH[row]
 
         #sum of hidden neuron is a sum of values in single column
         sumOfWeightsInputProduct = np.sum(self.productOfWeightsAndInput, axis=0)
@@ -58,6 +63,7 @@ class Network:
         self.productOfWeightsAndHidden = np.copy(self.weightsHiddenToOutput)
         for elementIter in range(len(self.productOfWeightsAndHidden)):
             self.productOfWeightsAndHidden[elementIter] *= self.sigmoidSumOfWeightsInputProduct[elementIter]
+            self.productOfWeightsAndHidden[elementIter] += biasO[elementIter]
 
         # sum of output neuron is a sum of values in single column
         sumOfWeightsHiddenProduct = np.sum(self.productOfWeightsAndHidden, axis=0)
