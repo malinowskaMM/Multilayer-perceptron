@@ -57,7 +57,7 @@ class Network:
         else:
             self.weightsHiddenToOutput = weightsHToO
 
-    def forwardPropagation(self, input, biasH=None, biasO=None):
+    def forwardPropagation(self, input, testingMode=False, biasH=None, biasO=None):
         if biasH is None:
             biasH = np.zeros((self.inputNumber, self.hiddenNumber))
         if biasO is None:
@@ -90,10 +90,11 @@ class Network:
         return sigmoidSumOfWeightsHiddenProduct
 
     # alpha - step length coefficient
-    def backwardPropagation(self, input, expected, outputForward, alpha = 1):
+    def backwardPropagation(self, input, expected, outputForward, epochNumber, errorsOfEpoch, alpha=1):
         # calculate sum of errors (global error) between expected and output
         errorSum = _sum(outputForward, expected)  # Cost function
-        # print(errorSum)
+        if epochNumber % 10 == 0:
+            errorsOfEpoch.append(errorSum)
 
         # weights hidden to output modifications
         modifyHiddenToOutputWeights = np.copy(self.weightsHiddenToOutput)
@@ -122,7 +123,9 @@ class Network:
         self.weightsInputToHidden -= modifyInputToHiddenWeights * alpha
 
     def trainNew(self, input, expected, epochNum):
+        errorsOfEpoch = []
         for i in range(epochNum):
             for j in range(len(input)):
                 output = self.forwardPropagation(input[j])
-                self.backwardPropagation(input[j],  _castClassNamesToZerosOnesArray(expected[j]), output)
+                self.backwardPropagation(input[j], _castClassNamesToZerosOnesArray(expected[j]), output, epochNum, errorsOfEpoch)
+        return errorsOfEpoch

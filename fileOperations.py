@@ -30,8 +30,8 @@ def saveNetworkToFile(mlp: network.Network):
     file.write(lineWeightsHiddenToOutput)
 
 
-def loadNetworkFromFile():
-    file = open('mlp_28_5_2022_19_59_59.txt', 'r')
+def loadNetworkFromFile(name):
+    file = open(name, 'r')
     fileContent = file.readlines()
     numbers = fileContent[0].split(",")
     numbers = numbers[:3]
@@ -59,3 +59,29 @@ def loadNetworkFromFile():
 
     mlp = network.Network(numbers[0], numbers[1], numbers[2], weightsInputToHidden, weightsHiddenToOutput)
     return mlp
+
+
+def writeErrorsOfEpochToFile(valuesList):
+    time = datetime.datetime.now()
+    file = open(
+        'mlp_learn_stats_' + "%s_%s_%s_%s_%s_%s.txt" % (time.day, time.month, time.year, time.hour, time.minute, time.second), "w")
+    valuesStr=""
+    for value in valuesList:
+        valuesStr += str(value) + ","
+    file.write(valuesStr)
+
+
+def loadData(name, inputsNumber):
+    # reading data file
+    data = np.genfromtxt(name, delimiter=",", dtype="str")
+    # shuffle rows in data to get random iris population
+    np.random.shuffle(data)
+
+    # get iris name class
+    dataClass = data[:, inputsNumber]
+    # get iris values
+    dataValues = data[:, :inputsNumber]
+    # cast values from str to float
+    dataValues = np.asarray(dataValues, dtype=float)
+
+    return [dataValues, dataClass]

@@ -1,31 +1,16 @@
-
-import pandas as pd
 import network as nt
-import numpy as np
 import fileOperations
 
-# reading data file
-data = np.genfromtxt('iris.data', delimiter=",", dtype="str")
-# shuffle rows in data to get random iris population
-np.random.shuffle(data)
+data = fileOperations.loadData('iris.data', 4)
 
-#get iris name class
-dataClass = data[:, 4]
-#get iris values
-dataValues = data[:, :4]
-#cast values from str to float
-dataValues = np.asarray(dataValues, dtype=float)
+trainingValues = data[0][:75]
+trainingClasses = data[1][:75]
 
 
-trainingValues = dataValues[:75]
-trainingClasses = dataClass[:75]
+mlp = nt.Network(4, 2, 3, None, None)
+fileOperations.writeErrorsOfEpochToFile(mlp.trainNew(trainingValues, trainingClasses, 50))
 
-testValues = dataValues[125:]
-testClasses = dataClass[125:]
 
-#mlp = nt.Network(4, 2, 3, None, None)
-#mlp.trainNew(trainingValues, trainingClasses, 50)
-
-mlp2 = fileOperations.loadNetworkFromFile()
-mlp2.trainNew(trainingValues, trainingClasses, 50)
+mlp2 = fileOperations.loadNetworkFromFile('mlp_28_5_2022_19_59_59.txt')
+# mlp2.trainNew(trainingValues, trainingClasses, 50)
 
