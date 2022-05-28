@@ -129,5 +129,8 @@ class Network:
         output = self.forwardPropagation(input)
         # self.backwardPropagation(input, expected, output)
 
-
-
+    def trainNew(self, input, expected, epochNum):
+        for i in range(epochNum):
+            for j in range(len(input)):
+                output = self.forwardPropagation(input[j])
+                self.backwardPropagation(input[j], expected[j], output)
