@@ -31,7 +31,7 @@ def castClassNamesToZerosOnesArray(className):
         return [0, 0, 1]
 
 
-mlp = nt.Network(4, 5, 3, None, None)
+mlp = nt.Network(4, 2, 3, None, None)
 mlp.train(trainingValues[0], castClassNamesToZerosOnesArray(trainingClasses[0]))
 # for i in range(len(trainingValues)):
 #     mlp.train(trainingValues[i], castClassNamesToZerosOnesArray(trainingClasses[i]))
