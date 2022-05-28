@@ -1,0 +1,88 @@
+pochodna funkcji  błedu po każdej składowej, 
+zmienić każdą wagę (waga - odpowiadający składnik jej gradientu (pochodn po danej wadze))
+minimalizacja błedu 
+tak żeby nie przeskoczyć minimum dla błędu 
+jesli zmiana za mała - (dobór współczynnika kroku - empirycznie) to bardzo małe kroki
+
+parametr kroku iteracyjnie zmiejszamy (na siłe mozna na sztywno w tym zadaniu)
+- ale można oddzielnie dl awarstwy a nawet odzielnie dla neuronu 
+
+-np. metoda najszybszego spadku - nie najszybsza, metody oparte o hesjany (macierez drugich pochodnych)
+
+dlugosc wektoru gradientu zalezy od stromosci funkcji (im bardziej stroma funkcja,
+tym większy krok zrobimy) - łatwo możemy utknąc w minim lokalnym (pochodne się wyzerują
+i nauka się zatrzyma - wada metod gradientowych)
+
+-możemy czasem wykorzystywac tylko znak pochodnej 
+
+-metoda momentum - bierzmy gradient (wektor bieżący - gradient) - uwzgledniamy poprzedni przyrost waga
+tak jakbysmy mieli "rozpęd" - umozliwa wyskoczenie z minimum lokalnego 
+
+offline - wagi modyfikujemy raz na epokę - akumulujemy info o błędach, raz po przejsciu wszytskich ze zbioru treningowego modyfikujemy wagi - "bardziej poprawna" bo optymalizujemy dla całego zbioru
+online - wagi modyfikujmey po każdym - patrzymy jaki jest bład i od razu modyfikujemy 
+epoka - przejscie przez cały zbiór treningowy
+
+dla deep learning - znajdujemy podzbiory i na nich uczymy 
+
+WAZNA JEST LOSOWA KOLEJNOŚĆ
+
+
+wielowymiarowe funkcje mozemy przekroić i dostac jej przekrój i to jego minimalizować
+
+
+główne zadanie: jak obliczyć pochodne? (jaki algorytm)
+pochodna funkcji błedu po wadze - reszta wag jest stałymi więc elo 
+
+wyjscie - to co miało wyjść) * pochodna funkcji aktuwacji (funkcja jednej zmiennej) * sygnał wejsciwy wchodzący na te wagę = POCHODNA FUNKCJI BŁĘDU PO DANJE WADZE
+
+
+pochodne po wagach warstwy ukrytej- od wagi zalezą wyjścia wszytskich neuronów
+
+uogolniony sygnał błędu * pochodna punkcji aktywacji * sygnał wejsciowy wchodzacy na te wagę = pochodna po wagach warstwy ukrytej
+
+uogólniony sygnał błedu - suma sygnałów 
+									
+	^
+	|  algorytm propagacji wstecznje sygnału błedu 
+	
+
+
+
+	
+dowolna liczba warstw
+ilosc neuronów (ukryta + wejssciowa)
+ilosc wyjśc wejśc
+wczytanie danych 
+implementacja w przad (przy wylosowanych wagach przejsc przez kolejne warsrwy)
+zapisywanie sieci do pliku (wagi + struktura)
+trening - epok (prezentacja wszytskich nerownow ze zbioru treningowego - np 150 kwiatkow do pokazania w irysach)
+
+1) autoasocjajcja - 4 wejscia - 4 wyjscia  (to co na wejsciu do na wyjsciu)
+		w warstwie ukrytej mniej neuronów (tzw. wąskie gardło) - zastowanie do kompresji 
+
+
+
+	
+Jakosc processu treningu - krzywa błędu (jak zmeinia się błąd w kolejnych epokach)
+	- początek: wagi mają wartości przypadkowe
+	- w kolejnych epokach blad będzie spadał - usredniony bład dla epoki 
+
+
+Dane podzielić na zbiór treningowy i testowy - żeby nie było tak że nie mamy jak sprawdzić jak siec działa na zbiorze na którym się nie uczyła
+
+
+
+*moze wystąpić sytuacja, że w pewnym momencie błąd zacznie rosnąć - przeuczenie, w zbiorze treningowym wyróżniamy jeszcze jeden podzbiór - walidacyjny - i tam badamy warunek stopu 
+
+
+neurony w warstwie wejsciowej dostają dwa atrybuty
+
+minimalna ilość neuronów ukrytych 
+
+zbyt malo elementów na zbiorze treningowym - !!! sztuczne rozszerzenie pulu poprzez dodanie !!! szumów np. przy klasyfikacjach obrazu - dodajmey odbicie lustrzane i mamy 2 razy większy zbiór 
+
+TERMIN: DO KOŃCA MAJA, DO 23 MAJA
+
+
+
+generowac przezdiały -0,5 do 0,5
