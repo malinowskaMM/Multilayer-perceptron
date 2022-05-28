@@ -41,32 +41,27 @@ class Network:
     def forwardPropagation(self, input):
         print(input)
         #signle row contains weights for one hidden neuron
-        self.productOfWeightsAndInput = np.copy(self.weightsInputToHidden)
-        for row in range(len(self.productOfWeightsAndInput)):
-            self.productOfWeightsAndInput[row] *= input[row]
+        productOfWeightsAndInput = np.copy(self.weightsInputToHidden)
+        for row in range(len(productOfWeightsAndInput)):
+            productOfWeightsAndInput[row] *= input[row]
 
         #sum of hidden neuron is a sum of values in single column
-        sumOfWeightsInputProduct = np.sum(self.productOfWeightsAndInput, axis=0)
+        self.sumOfWeightsInputProduct = np.sum(productOfWeightsAndInput, axis=0)
 
         #for each sum we use sigmoid function
-        self.sigmoidSumOfWeightsInputProduct = np.copy(sumOfWeightsInputProduct)
-        for sumIter in range(len(self.sigmoidSumOfWeightsInputProduct)):
-            self.sigmoidSumOfWeightsInputProduct[sumIter] = _sigmoid(self.sigmoidSumOfWeightsInputProduct[sumIter])
-        #print(sigmoidSumOfWeightsInputProduct)
+        self.sigmoidSumOfWeightsInputProduct = _sigmoid(self.sumOfWeightsInputProduct)
 
         ##signle row contains weights for one output neuron
-        self.productOfWeightsAndHidden = np.copy(self.weightsHiddenToOutput)
-        for elementIter in range(len(self.productOfWeightsAndHidden)):
-            self.productOfWeightsAndHidden[elementIter] *= self.sigmoidSumOfWeightsInputProduct[elementIter]
+        productOfWeightsAndHidden = np.copy(self.weightsHiddenToOutput)
+        for elementIter in range(len(productOfWeightsAndHidden)):
+            productOfWeightsAndHidden[elementIter] *= self.sigmoidSumOfWeightsInputProduct[elementIter]
 
         # sum of output neuron is a sum of values in single column
-        sumOfWeightsHiddenProduct = np.sum(self.productOfWeightsAndHidden, axis=0)
+        self.sumOfWeightsHiddenProduct = np.sum(productOfWeightsAndHidden, axis=0)
 
 
         # for each sum we use sigmoid function
-        sigmoidSumOfWeightsHiddenProduct = np.copy(sumOfWeightsHiddenProduct)
-        for sumIter in range(len(sigmoidSumOfWeightsHiddenProduct)):
-            sigmoidSumOfWeightsHiddenProduct[sumIter] = _sigmoid(sigmoidSumOfWeightsHiddenProduct[sumIter])
+        sigmoidSumOfWeightsHiddenProduct = _sigmoid(self.sumOfWeightsHiddenProduct)
 
         # print(self.weightsInputToHidden)
         # print(productOfWeightsAndInput)
@@ -95,7 +90,7 @@ class Network:
         for weightRowIter in range(len(modifyHiddenToOutputWeights)):
             for weightColIter in range(len(modifyHiddenToOutputWeights[0])):
                 modifyHiddenToOutputWeights[weightRowIter][weightColIter] *= _sum(outputForward[weightColIter], expected[weightColIter], True)
-                modifyHiddenToOutputWeights[weightRowIter][weightColIter] *= _sigmoid(self.productOfWeightsAndHidden[weightColIter], True)
+                modifyHiddenToOutputWeights[weightRowIter][weightColIter] *= _sigmoid(self.sumOfWeightsHiddenProduct [weightColIter], True)
 
 
         print((self.weightsHiddenToOutput))
@@ -110,9 +105,9 @@ class Network:
         modifyInputToHiddenWeights = np.copy(self.weightsInputToHidden)
         for weightRowIter in range(len(modifyInputToHiddenWeights)):
             for weightColIter in range(len(modifyInputToHiddenWeights[0])):
-                modifyInputToHiddenWeights[weightRowIter][weightColIter] = _sigmoid( self.productOfWeightsAndInput[weightColIter], True)
+                modifyInputToHiddenWeights[weightRowIter][weightColIter] = _sigmoid(self.sumOfWeightsInputProduct[weightColIter], True)
                 modifyInputToHiddenWeights[weightRowIter][weightColIter] *= sumOfWeightsHiddenProduct[weightColIter % 2]
-                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= input[weightRowIter][weightColIter]
+                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= input[weightColIter]
 
 
         self.weightsInputToHidden -= modifyInputToHiddenWeights
@@ -121,7 +116,7 @@ class Network:
 
     def train(self, input, expected):
         output = self.forwardPropagation(input)
-        # self.backwardPropagation(input, expected, output)
+        self.backwardPropagation(input, expected, output)
 
 
 
