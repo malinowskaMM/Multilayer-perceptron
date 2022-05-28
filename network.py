@@ -81,8 +81,11 @@ class Network:
     #alpha - step length coefficient
     def backwardPropagation(self, input, expected, outputForward, alpha = 1):
         #calculate sum of errors (global error) between expected and output
-        errorSum = _sum(outputForward, expected)
-        #print(errorSum)
+        errorSum = _sum(outputForward, expected)  #Cost function
+        divErrorSum = 0
+        for i in range(len(outputForward)):
+            divErrorSum += _sum(outputForward[i], expected[i], True)
+        print(divErrorSum)
 
         #weights hidden to output modifications
         modifyHiddenToOutputWeights = np.copy(self.weightsHiddenToOutput)
@@ -107,7 +110,7 @@ class Network:
                 modifyInputToHiddenWeights[weightRowIter][weightColIter] *= self.weightsInputToHidden[weightRowIter][weightColIter]
 
         self.weightsInputToHidden -= modifyInputToHiddenWeights
-        print(self.weightsInputToHidden)
+        print(modifyInputToHiddenWeights)
 
 
     def train(self, input, expected):
