@@ -14,6 +14,14 @@ def _sum(outputForward, expected ,deriv=False):
         errorSum += (expected[i] - outputForward[i]) ** 2
     return errorSum / 2
 
+def _castClassNamesToZerosOnesArray(className):
+    if className == 'Iris-versicolor':
+        return [1, 0, 0]
+    elif className == 'Iris-setosa':
+        return [0, 1, 0]
+    elif className == 'Iris-virginica':
+        return [0, 0, 1]
+
 class Network:
     # inputNumber - ilosc neuronów wejściowych,
     # hiddenNumber - ilość neuronów w warstwie ukrytej
@@ -100,12 +108,9 @@ class Network:
 
         # sum of output neuron is a sum of values in single column
         sumOfWeightsHiddenProduct = np.sum(np.copy(self.weightsHiddenToOutput), axis=1)
-        print(sumOfWeightsHiddenProduct)
 
         #weights input to hidden modifications
         modifyInputToHiddenWeights = np.copy(self.weightsInputToHidden)
-        print(modifyInputToHiddenWeights)
-        print(input)
         for weightRowIter in range(len(modifyInputToHiddenWeights)):
             for weightColIter in range(len(modifyInputToHiddenWeights[0])):
                 modifyInputToHiddenWeights[weightRowIter][weightColIter] = _sigmoid(self.sigmoidSumOfWeightsInputProduct[weightColIter], True)
@@ -117,12 +122,9 @@ class Network:
         #print(modifyInputToHiddenWeights)
 
 
-    def train(self, input, expected):
-        output = self.forwardPropagation(input)
-        self.backwardPropagation(input, expected, output)
 
     def trainNew(self, input, expected, epochNum):
         for i in range(epochNum):
             for j in range(len(input)):
                 output = self.forwardPropagation(input[j])
-                self.backwardPropagation(input[j], expected[j], output)
+                self.backwardPropagation(input[j],  _castClassNamesToZerosOnesArray(expected[j]), output)

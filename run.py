@@ -22,17 +22,9 @@ trainingClasses = dataClass[:75]
 testValues = dataValues[125:]
 testClasses = dataClass[125:]
 
-def castClassNamesToZerosOnesArray(className):
-    if className == 'Iris-versicolor':
-        return [1, 0, 0]
-    elif className == 'Iris-setosa':
-        return [0, 1, 0]
-    elif className == 'Iris-virginica':
-        return [0, 0, 1]
+
 
 
 mlp = nt.Network(4, 2, 3, None, None)
-mlp.train(trainingValues[0], castClassNamesToZerosOnesArray(trainingClasses[0]))
-# for i in range(len(trainingValues)):
-#     mlp.train(trainingValues[i], castClassNamesToZerosOnesArray(trainingClasses[i]))
+mlp.trainNew(trainingValues,trainingClasses, 50)
 
