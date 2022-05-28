@@ -30,15 +30,9 @@ def castClassNamesToZerosOnesArray(className):
     elif className == 'Iris-virginica':
         return [0, 0, 1]
 
+
 mlp = nt.Network(4, 5, 3, None, None)
-mlp.train(trainingValues, castClassNamesToZerosOnesArray(trainingClasses))
-
-
+mlp.train(trainingValues[0], castClassNamesToZerosOnesArray(trainingClasses[0]))
 # for i in range(len(trainingValues)):
 #     mlp.train(trainingValues[i], castClassNamesToZerosOnesArray(trainingClasses[i]))
-#
-# for i in range(len(testValues)):
-#     result = mlp.forwardPropagation(testValues[i])
-#     print(result)
-# print()
 
