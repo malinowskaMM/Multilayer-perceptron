@@ -2,6 +2,7 @@
 import pandas as pd
 import network as nt
 import numpy as np
+import fileOperations
 
 # reading data file
 data = np.genfromtxt('iris.data', delimiter=",", dtype="str")
@@ -22,9 +23,8 @@ trainingClasses = dataClass[:75]
 testValues = dataValues[125:]
 testClasses = dataClass[125:]
 
-
-
-
 mlp = nt.Network(4, 2, 3, None, None)
 mlp.trainNew(trainingValues,trainingClasses, 50)
+
+fileOperations.saveNetworkToFile(mlp)
 
