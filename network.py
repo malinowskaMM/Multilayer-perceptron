@@ -105,7 +105,7 @@ class Network:
 
 
         print((self.weightsHiddenToOutput))
-        self.weightsHiddenToOutput -= modifyHiddenToOutputWeights
+        self.weightsHiddenToOutput -= modifyHiddenToOutputWeights * alpha
         print((self.weightsHiddenToOutput))
 
         # sum of output neuron is a sum of values in single column
@@ -121,7 +121,7 @@ class Network:
                 modifyInputToHiddenWeights[weightRowIter][weightColIter] *= input[weightRowIter][weightColIter]
 
 
-        self.weightsInputToHidden -= modifyInputToHiddenWeights
+        self.weightsInputToHidden -= modifyInputToHiddenWeights * alpha
         #print(modifyInputToHiddenWeights)
 
 
