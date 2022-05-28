@@ -38,7 +38,7 @@ def loadNetworkFromFile(name):
     numbers = [int(x) for x in numbers]
 
     weightsInputToHiddenInput = fileContent[1].split(",")
-    weightsInputToHiddenInput = weightsInputToHiddenInput[:len(weightsInputToHiddenInput)-1]
+    weightsInputToHiddenInput = weightsInputToHiddenInput[:len(weightsInputToHiddenInput) - 1]
     weightsInputToHiddenInput = [float(x) for x in weightsInputToHiddenInput]
 
     # weightsInputToHidden (inputNumber, hiddenNumber)
@@ -48,7 +48,7 @@ def loadNetworkFromFile(name):
             weightsInputToHidden[row][col] = weightsInputToHiddenInput[col + row * col]
 
     weightsHiddenToOutputInput = fileContent[2].split(",")
-    weightsHiddenToOutputInput = weightsHiddenToOutputInput[:len(weightsHiddenToOutputInput)-1]
+    weightsHiddenToOutputInput = weightsHiddenToOutputInput[:len(weightsHiddenToOutputInput) - 1]
     weightsHiddenToOutputInput = [float(x) for x in weightsHiddenToOutputInput]
 
     # weightsHiddenToOutput (hiddenNumber, outputNumber)
@@ -64,11 +64,46 @@ def loadNetworkFromFile(name):
 def writeErrorsOfEpochToFile(valuesList):
     time = datetime.datetime.now()
     file = open(
-        'mlp_learn_stats_' + "%s_%s_%s_%s_%s_%s.txt" % (time.day, time.month, time.year, time.hour, time.minute, time.second), "w")
-    valuesStr=""
+        'mlp_learn_stats_' + "%s_%s_%s_%s_%s_%s.txt" % (
+            time.day, time.month, time.year, time.hour, time.minute, time.second), "w")
+    valuesStr = ""
     for value in valuesList:
         valuesStr += str(value) + ","
     file.write(valuesStr)
+
+
+def writeTableToFile(table, posInList, file):
+    element5 = table[posInList]
+    element5String = ""
+    for i in range(len(element5)):
+        element5String += str(element5[i]) + ", "
+    file.write(element5String)
+    file.write("\n")
+
+
+def writeTestingStats(testingStats):
+    time = datetime.datetime.now()
+    file = open(
+        'mlp_test_stats_' + "%s_%s_%s_%s_%s_%s.txt" % (
+            time.day, time.month, time.year, time.hour, time.minute, time.second), "w")
+    valuesStr = ""
+
+    # 1. wzorzec wejsciowy
+    writeTableToFile(testingStats, 0, file)
+    # 2. wartosc na wyjsciu
+    writeTableToFile(testingStats, 1, file)
+    # 3. wagi neuronow wyjsciowych
+    writeTableToFile(testingStats, 2, file)
+    # 4. wartosci wyjsciowych neuronów ukrytych
+    writeTableToFile(testingStats, 3, file)
+    # 5. wagi neuronow ukrytych
+    writeTableToFile(testingStats, 4, file)
+    # 6. pożadany wzorzec odpowiedzi
+    writeTableToFile(testingStats, 5, file)
+    # 7. bład na poszeczgólnych wyjsciach sieci
+    writeTableToFile(testingStats, 6, file)
+    # 8. popełniony przez siec bład dla całego wzorca
+    file.write(str(testingStats[7]))
 
 
 def loadData(name, inputsNumber):

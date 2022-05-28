@@ -57,7 +57,7 @@ class Network:
         else:
             self.weightsHiddenToOutput = weightsHToO
 
-    def forwardPropagation(self, input, testingMode=False, biasH=None, biasO=None):
+    def forwardPropagation(self, input, testingStats=None, testingMode=False, biasH=None, biasO=None):
         if biasH is None:
             biasH = np.zeros((self.inputNumber, self.hiddenNumber))
         if biasO is None:
@@ -87,10 +87,17 @@ class Network:
         # for each sum we use sigmoid function - out o
         sigmoidSumOfWeightsHiddenProduct = _sigmoid(sumOfWeightsHiddenProduct)
 
+        if testingMode:
+            testingStats.append(input)  # wzorzec wejsciowy
+            testingStats.append(sigmoidSumOfWeightsHiddenProduct)  # wartosc na wyjsciu
+            testingStats.append(self.weightsHiddenToOutput)  # wagi neuronow wyjsciowych
+            testingStats.append(self.sigmoidSumOfWeightsInputProduct)  # wartosci wyjsciowych neuronów ukrytych
+            testingStats.append(self.weightsInputToHidden)  # wagi neuronow ukrytych
+
         return sigmoidSumOfWeightsHiddenProduct
 
     # alpha - step length coefficient
-    def backwardPropagation(self, input, expected, outputForward, epochNumber, errorsOfEpoch, alpha=1):
+    def backwardPropagation(self, input, expected, outputForward, epochNumber, errorsOfEpoch, alpha=0.6):
         # calculate sum of errors (global error) between expected and output
         errorSum = _sum(outputForward, expected)  # Cost function
         if epochNumber % 10 == 0:
@@ -129,3 +136,16 @@ class Network:
                 output = self.forwardPropagation(input[j])
                 self.backwardPropagation(input[j], _castClassNamesToZerosOnesArray(expected[j]), output, epochNum, errorsOfEpoch)
         return errorsOfEpoch
+
+    def testingOne(self, input, expected):
+        # 1. wzorzec wejsciowy
+        # 2. wartosc na wyjsciu
+        # 3. wagi neuronow wyjsciowych
+        # 4. wartosci wyjsciowych neuronów ukrytych
+        # 5. wagi neuronow ukrytych
+        testingStats = []
+        output = self.forwardPropagation(input, testingStats, True)
+        testingStats.append(expected)  # 6. pożadany wzorzec odpowiedzi
+        testingStats.append(expected-output)  # 7. bład na poszeczgólnych wyjsciach sieci
+        testingStats.append(_sum(output, expected))  # 8. popełniony przez siec bład dla całego wzorca
+        return testingStats
