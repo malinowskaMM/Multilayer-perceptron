@@ -15,7 +15,7 @@ def saveNetworkToFile(mlp: network.Network):
     file = open(
         'mlp_' + "%s_%s_%s_%s_%s_%s.txt" % (time.day, time.month, time.year, time.hour, time.minute, time.second), "w")
     line = f'{mlp.inputNumber},{mlp.hiddenNumber},{mlp.outputNumber},'
-    file.write(line)
+    file.writelines(line)
 
     lineWeightsInputToHidden = '\n'
     for row in range(len(mlp.weightsInputToHidden)):
@@ -28,3 +28,34 @@ def saveNetworkToFile(mlp: network.Network):
         for col in range(len(mlp.weightsHiddenToOutput[0])):
             lineWeightsHiddenToOutput += str(mlp.weightsHiddenToOutput[row][col]) + ','
     file.write(lineWeightsHiddenToOutput)
+
+
+def loadNetworkFromFile():
+    file = open('mlp_28_5_2022_19_59_59.txt', 'r')
+    fileContent = file.readlines()
+    numbers = fileContent[0].split(",")
+    numbers = numbers[:3]
+    numbers = [int(x) for x in numbers]
+
+    weightsInputToHiddenInput = fileContent[1].split(",")
+    weightsInputToHiddenInput = weightsInputToHiddenInput[:len(weightsInputToHiddenInput)-1]
+    weightsInputToHiddenInput = [float(x) for x in weightsInputToHiddenInput]
+
+    # weightsInputToHidden (inputNumber, hiddenNumber)
+    weightsInputToHidden = np.zeros((numbers[0], numbers[1]))
+    for row in range(len(weightsInputToHidden)):
+        for col in range(len(weightsInputToHidden[0])):
+            weightsInputToHidden[row][col] = weightsInputToHiddenInput[col + row * col]
+
+    weightsHiddenToOutputInput = fileContent[2].split(",")
+    weightsHiddenToOutputInput = weightsHiddenToOutputInput[:len(weightsHiddenToOutputInput)-1]
+    weightsHiddenToOutputInput = [float(x) for x in weightsHiddenToOutputInput]
+
+    # weightsHiddenToOutput (hiddenNumber, outputNumber)
+    weightsHiddenToOutput = np.zeros((numbers[1], numbers[2]))
+    for row in range(len(weightsHiddenToOutput)):
+        for col in range(len(weightsHiddenToOutput[0])):
+            weightsHiddenToOutput[row][col] = weightsHiddenToOutputInput[col + row * col]
+
+    mlp = network.Network(numbers[0], numbers[1], numbers[2], weightsInputToHidden, weightsHiddenToOutput)
+    return mlp

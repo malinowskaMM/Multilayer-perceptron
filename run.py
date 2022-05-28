@@ -23,8 +23,9 @@ trainingClasses = dataClass[:75]
 testValues = dataValues[125:]
 testClasses = dataClass[125:]
 
-mlp = nt.Network(4, 2, 3, None, None)
-mlp.trainNew(trainingValues,trainingClasses, 50)
+#mlp = nt.Network(4, 2, 3, None, None)
+#mlp.trainNew(trainingValues, trainingClasses, 50)
 
-fileOperations.saveNetworkToFile(mlp)
+mlp2 = fileOperations.loadNetworkFromFile()
+mlp2.trainNew(trainingValues, trainingClasses, 50)
 
