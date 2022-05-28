@@ -12,8 +12,7 @@ def _sum(outputForward, expected ,deriv=False):
         return (expected - outputForward) * (-1)
     for i in range(len(outputForward)):
         errorSum += (expected[i] - outputForward[i]) ** 2
-        errorSum /= 2
-    return errorSum
+    return errorSum / 2
 
 class Network:
     # inputNumber - ilosc neuronów wejściowych,
