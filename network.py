@@ -139,3 +139,11 @@ class Network:
                 globalError = _sum(output, _castClassNamesToZerosOnesArray(expected[j]))
                 print(globalError)
                 self.backwardPropagation(input[j],  _castClassNamesToZerosOnesArray(expected[j]), output)
+
+    def trainTest(self, input, expected, epochNum):
+        for i in range(epochNum):
+            for j in range(len(input)):
+                output = self.forwardPropagation(input[j])
+                globalError = _sum(output, expected[j])
+                print(globalError)
+                self.backwardPropagation(input[j],  expected[j], output)
