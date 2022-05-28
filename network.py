@@ -9,8 +9,7 @@ def _sigmoid(x, deriv=False):
 def _sum(outputForward, expected ,deriv=False):
     errorSum = 0
     if deriv is True: #outputForward and expected as number not array
-        errorSum += (expected - outputForward) * (-1)
-        return errorSum
+        return (expected - outputForward) * (-1)
     for i in range(len(outputForward)):
         errorSum += (expected[i] - outputForward[i]) ** 2
         errorSum /= 2
@@ -89,7 +88,7 @@ class Network:
         modifyHiddenToOutputWeights = np.copy(self.weightsHiddenToOutput)
         for weightRowIter in range(len(modifyHiddenToOutputWeights)):
             for weightColIter in range(len(modifyHiddenToOutputWeights[0])):
-                modifyHiddenToOutputWeights[weightRowIter][weightColIter] = _sum(outputForward[weightColIter],expected[weightColIter], True)
+                modifyHiddenToOutputWeights[weightRowIter][weightColIter] = _sum(outputForward[weightColIter], expected[weightColIter], True)
                 modifyHiddenToOutputWeights[weightRowIter][weightColIter] *= _sigmoid(outputForward[weightColIter], True)
                 modifyHiddenToOutputWeights[weightRowIter][weightColIter] *= outputForward[weightColIter]
 
@@ -103,54 +102,17 @@ class Network:
         modifyInputToHiddenWeights = np.copy(self.weightsInputToHidden)
         for weightRowIter in range(len(modifyInputToHiddenWeights)):
             for weightColIter in range(len(modifyInputToHiddenWeights[0])):
-                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= _sigmoid(outputForward[weightColIter%2], True)
-                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= sumOfWeightsHiddenProduct[weightColIter%2]
+                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= _sigmoid(outputForward[weightColIter % 2], True)
+                modifyInputToHiddenWeights[weightRowIter][weightColIter] *= sumOfWeightsHiddenProduct[weightColIter % 2]
                 modifyInputToHiddenWeights[weightRowIter][weightColIter] *= self.weightsInputToHidden[weightRowIter][weightColIter]
 
-        self.weightsInputToHidden -= modifyInputToHiddenWeights #*alpha
-        #print(self.weightsInputToHidden)
+        self.weightsInputToHidden -= modifyInputToHiddenWeights
+        print(self.weightsInputToHidden)
+
+
+    def train(self, input, expected):
+        output = self.forwardPropagation(input)
+        self.backwardPropagation(input, expected, output)
 
 
 
-
-
-
-    # def train(self, input, expected):
-    # output = self.forwardPropagation(input)
-    # self.backwardPropagation(input, expected, output)
-
-
-o = Network(4, 12, 4, None, None)
-table = np.array([2, 5, 6, 8])
-ex = np.array([1, 0, 0, 0])
-outputForward = o.forwardPropagation(table)
-print(outputForward)
-o.backwardPropagation(table, ex, outputForward, None)
-table1 = np.array([6, 2, 6, 8])
-ex1 = np.array([0, 1, 0, 0])
-outputForward = o.forwardPropagation(table1)
-print(outputForward)
-o.backwardPropagation(table, ex1, outputForward, None)
-table2 = np.array([6, 18, 2, 8])
-ex2 = np.array([0, 0, 1, 0])
-outputForward = o.forwardPropagation(table2)
-print(outputForward)
-o.backwardPropagation(table, ex2, outputForward, None)
-table3 = np.array([6, 18, 0, 8])
-ex3 = np.array([0, 0, 0, 0])
-outputForward = o.forwardPropagation(table3)
-print(outputForward)
-o.backwardPropagation(table, ex3, outputForward, None)
-table4 = np.array([6, 18, 0, 2])
-ex4 = np.array([0, 0, 0, 1])
-outputForward = o.forwardPropagation(table4)
-print(outputForward)
-o.backwardPropagation(table, ex4, outputForward, None)
-
-
-
-
-tableX = np.array([0, 2, 1, 0])
-outputForward = o.forwardPropagation(tableX)
-print("-------------")
-print(outputForward)

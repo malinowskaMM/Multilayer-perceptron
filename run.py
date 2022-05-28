@@ -1,4 +1,4 @@
-'''
+
 import pandas as pd
 import network as nt
 import numpy as np
@@ -16,21 +16,21 @@ dataValues = data[:, :4]
 dataValues = np.asarray(dataValues, dtype=float)
 
 
-trainingValues = dataValues[:25]
-trainingClasses = dataClass[:25]
-'''
+trainingValues = dataValues[:75]
+trainingClasses = dataClass[:75]
 
+testValues = dataValues[125:]
+testClasses = dataClass[125:]
 
-'''input = np.array([1, 2])
-net = nt.Network(2, 2, 2, None, None)
-for i in range(3):
-    net.train(input, np.array([2, 6]))'''
+def castClassNamesToZerosOnesArray(className):
+    if className == 'Iris-versicolor':
+        return [1, 0, 0]
+    elif className == 'Iris-setosa':
+        return [0, 1, 0]
+    elif className == 'Iris-virginica':
+        return [0, 0, 1]
 
-input = np.array([1, 2, 3, 4])
-net = nt.Network(4, 2, 1, None, None)
-for i in range(6):
-    net.train(input, 1)
+mlp = nt.Network(4, 4, 3, None, None)
+for i in range(len(trainingValues)):
+    mlp.train(trainingValues[i], castClassNamesToZerosOnesArray(trainingClasses[i]))
 
-print("----------------------")
-#res = net.forwardPropagation(input)
-#print(res)
