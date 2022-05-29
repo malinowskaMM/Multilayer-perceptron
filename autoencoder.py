@@ -10,8 +10,9 @@ def train(net, input, expected, epochNum):
         np.random.shuffle(order)
         for j in range(4):
             output = net.forwardPropagation(input[order[j]])
-            net.backwardPropagation(input[order[j]], expected[order[j]], output)
-
+            if i % 20 == 0:
+                print(output)
+            net.backwardPropagation(input[order[j]], expected[order[j]], output, i, None)
 
 data = np.asarray(
          [[1, 0, 0, 0],
@@ -19,7 +20,7 @@ data = np.asarray(
           [0, 0, 1, 0],
           [0, 0, 0, 1]])
 
-mlp = nt.Network(4, 2, 4, None, None)
+mlp = nt.Network(4, 2, 4)
 train(mlp, data, data, 1000)
 print("hidden neurons output:", mlp.sigmoidSumOfWeightsInputProduct)
 result = mlp.forwardPropagation(data[0])
