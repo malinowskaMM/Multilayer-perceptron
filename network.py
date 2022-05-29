@@ -57,7 +57,6 @@ class Network:
         self.weightHToOIncrement = np.zeros((self.hiddenNumber, self.outputNumber))
 
 
-
     def forwardPropagation(self, input, biasH=0, biasO=0, testingStats=None, testingMode=False):
         # single row contains weights for one hidden neuron
 
@@ -96,7 +95,7 @@ class Network:
         return sigmoidSumOfWeightsHiddenProduct
 
 
-    def backwardPropagation(self, input, expected, outputForward, epochNumber, errorsOfEpoch, alpha=0.1):
+    def backwardPropagation(self, input, expected, outputForward, epochNumber, errorsOfEpoch, alpha=0.6):
         # calculate sum of errors (global error) between expected and output
         # errorSum = _sum(outputForward, expected)  # Cost function
         # if epochNumber % 10 == 0:
@@ -117,14 +116,17 @@ class Network:
         # print("weightsHiddenToOutputModification", weightsHiddenToOutputModification)  # d (PDF)
 
         hGreen = np.zeros(self.hiddenNumber)
+        hRight = _sigmoid(self.sumOfWeightsInputProduct)
+        hLeft = _sigmoid(hRight, deriv=True)
         if self.outputNumber == 1:
-            hGreen = self.sumOfWeightsInputProduct * weightsHiddenToOutputModification
+            hGreen = hLeft * weightsHiddenToOutputModification
         else:
             for i in range(self.hiddenNumber):
-                hGreen[i] = self.sumOfWeightsInputProduct[i] * np.sum(weightsHiddenToOutputModification[:, i])
+                hGreen[i] = hLeft[i] * np.sum(weightsHiddenToOutputModification[:, i])
         # print("hGreen", hGreen)  # wartosci w hidden gdy staja sie zielone w PDF
 
-        oGreen = self.sumOfWeightsHiddenProduct * errorsArray
+        err = expected - outputForward
+        oGreen = err * _sigmoid(err, deriv=True)
         # print("oGreen", oGreen)  # wartosci w output gdy staja sie zielone w PDF
 
         # wagi H-O += krok * wartosci w neuronach o(?) * h_out
