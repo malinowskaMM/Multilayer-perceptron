@@ -40,15 +40,16 @@ class Network:
     # outputNumber - ilość neuronów wyjściowych
     # weightsIToH - wektor wag z warstwy wejściowej do warstwy ukrytej
     # weightsHToO - wektor wag z warstwy ukrytej do wartwy wyjściowej
-    def __init__(self, inputNumber, hiddenNumber, outputNumber, biasChooser=False):
+    def __init__(self, inputNumber, hiddenNumber, outputNumber, momentum=0):
         self.counterBackward = 1
-        self.ifBias = biasChooser
         self.inputNumber = inputNumber
         self.hiddenNumber = hiddenNumber
         self.outputNumber = outputNumber
-
         self.weightsInputToHidden = np.random.rand(self.inputNumber, self.hiddenNumber)
         self.weightsHiddenToOutput = np.random.rand(self.hiddenNumber, self.outputNumber)
+        self.momentum = momentum
+        self.weightIToHIncrement = np.zeros((self.inputNumber, self.hiddenNumber))
+        self.weightHToOIncrement = np.zeros((self.hiddenNumber, self.outputNumber))
 
     def forwardPropagation(self, input, biasH=0, biasO=0, testingStats=None, testingMode=False):
         #single row contains weights for one hidden neuron
@@ -90,18 +91,24 @@ class Network:
         if epochNumber % 10 == 0:
             if errorsOfEpoch is not None:
                 errorsOfEpoch.append(errorSum)
+
         # weights hidden to output modifications
         weightsHtOBeforeChange = np.copy(self.weightsHiddenToOutput)  # needed for next layer calculations
         modifyHiddenToOutputWeights = np.zeros((self.hiddenNumber, self.outputNumber))
         # modifyHiddenToOutputWeights :  rows = hidden, col = output
         for row in range(self.hiddenNumber):
             for col in range(self.outputNumber):
-                change = -1 * (expected[col] - outputForward[col]) * outputForward[col] * (1 - outputForward[col]) * \
-                         self.weightsHiddenToOutput[row][col]
+                change = -1 * (expected[col] - outputForward[col]) * outputForward[col] * (1 - outputForward[col]) * self.weightsHiddenToOutput[row][col]
+                temp = change
+                change += self.momentum * self.weightHToOIncrement[row][col]
                 self.weightsHiddenToOutput[row][col] -= alpha * change  # weight modification (hidden to output)
+                self.weightHToOIncrement[row][col] = temp  # update weight change matrix
+
+
         # weights input to hidden modifications
         modifyInputToHiddenWeights = np.copy(self.weightsInputToHidden)
         # modifyInputToHiddenWeights :  rows = input, col = hidden
+
         # weights used here are weightsHtOBeforeChange, NOT self.weightsHiddenToOutput (which is modified at this point)
         for row in range(self.inputNumber):
             for col in range(self.hiddenNumber):
@@ -111,7 +118,11 @@ class Network:
                                 1 - outputForward[outputIter]) * self.weightsInputToHidden[row][col]
                     y = self.sumOfWeightsInputProduct[col] * (1 - self.sumOfWeightsInputProduct[col])
                     z = input[row]
-                    self.weightsInputToHidden[row][col] -= alpha * x * y * z
+                    change = x * y * z  # dla irysów szybko rośnie poza zakres, dla autoencoder już nie
+                    temp = change
+                    change += self.momentum * self.weightIToHIncrement[row][col]
+                    self.weightsInputToHidden[row][col] -= alpha * change
+                    self.weightIToHIncrement[row][col] = temp  # update weight change matrix
 
     def backwardPropagationOld(self, input, expected, outputForward, epochNumber, errorsOfEpoch, alpha=0.6):
         # calculate sum of errors (global error) between expected and output

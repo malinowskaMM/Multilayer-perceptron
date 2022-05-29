@@ -9,7 +9,7 @@ trainingValues = data[0][:75]
 trainingClasses = data[1][:75]
 
 
-mlp = nt.Network(4, 2, 3)
+mlp = nt.Network(4, 2, 3, momentum=0.6)
 fileOperations.writeErrorsOfEpochToFile(mlp.trainNew(trainingValues, trainingClasses, 50))
 test = np.array([1, 2, 3, 4])
 exp = np.array([0.3, 0.5, 0.7])

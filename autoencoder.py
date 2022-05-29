@@ -20,7 +20,7 @@ data = np.asarray(
           [0, 0, 1, 0],
           [0, 0, 0, 1]])
 
-mlp = nt.Network(4, 2, 4)
+mlp = nt.Network(4, 2, 4, momentum=0.6)
 train(mlp, data, data, 1000)
 print("hidden neurons output:", mlp.sigmoidSumOfWeightsInputProduct)
 result = mlp.forwardPropagation(data[0])
