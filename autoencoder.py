@@ -12,7 +12,7 @@ def train(net, input, expected, epochNum):
             output = net.forwardPropagation(input[order[j]])
             if i % 20 == 0:
                 print(output)
-            net.backwardPropagation(input[order[j]], expected[order[j]], output, i, None)
+            net.backwardPropagationOld(input[order[j]], expected[order[j]], output, i, None)
 
 data = np.asarray(
          [[1, 0, 0, 0],
