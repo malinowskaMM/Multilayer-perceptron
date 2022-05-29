@@ -1,5 +1,12 @@
 import numpy as np
 
+def _castClassNamesToZerosOnesArray(className):
+    if className == 'Iris-versicolor':
+        return [1, 0, 0]
+    elif className == 'Iris-setosa':
+        return [0, 1, 0]
+    elif className == 'Iris-virginica':
+        return [0, 0, 1]
 
 def _sigmoid(x, deriv=False):
     if deriv is True:
@@ -37,17 +44,12 @@ class Network:
         else:
             self.weightsHiddenToOutput = weightsHToO
 
-    def forwardPropagation(self, input, biasH=None, biasO=None):
-        if biasH is None:
-            biasH = np.zeros((self.inputNumber, self.hiddenNumber))
-        if biasO is None:
-            biasO = np.zeros((self.hiddenNumber, self.outputNumber))
-
-        #signle row contains weights for one hidden neuron
+    def forwardPropagation(self, input, biasH=0, biasO=0):
+        #single row contains weights for one hidden neuron
         productOfWeightsAndInput = np.copy(self.weightsInputToHidden)
         for row in range(len(productOfWeightsAndInput)):
             productOfWeightsAndInput[row] *= input[row]
-            productOfWeightsAndInput[row] += biasH[row]
+            productOfWeightsAndInput[row] += biasH
 
         #sum of hidden neuron is a sum of values in single column
         self.sumOfWeightsInputProduct = np.sum(productOfWeightsAndInput, axis=0)  # vector of inputs into hidden neurons
@@ -59,36 +61,22 @@ class Network:
         productOfWeightsAndHidden = np.copy(self.weightsHiddenToOutput)
         for elementIter in range(len(productOfWeightsAndHidden)):
             productOfWeightsAndHidden[elementIter] *= self.sigmoidSumOfWeightsInputProduct[elementIter]
-            productOfWeightsAndHidden[elementIter] += biasO[elementIter]
+            productOfWeightsAndHidden[elementIter] += biasO
         # sum of output neuron is a sum of values in single column
         self.sumOfWeightsHiddenProduct = np.sum(productOfWeightsAndHidden, axis=0)  # vector of inputs into output neurons
-
 
         # for each sum we use sigmoid function
         sigmoidSumOfWeightsHiddenProduct = _sigmoid(self.sumOfWeightsHiddenProduct) # vector of outputs from output neurons
 
-        # print(self.weightsInputToHidden)
-        # print(productOfWeightsAndInput)
-        # print(sumOfWeightsInputProduct)
-        # print(self.sigmoidSumOfWeightsInputProduct)
-        # print(self.weightsHiddenToOutput)
-        # print(productOfWeightsAndHidden)
-        # print(sumOfWeightsHiddenProduct)
-        # print(sigmoidSumOfWeightsHiddenProduct)
         output = sigmoidSumOfWeightsHiddenProduct
         return output
 
 
-
     #alpha - step length coefficient
-    def backwardPropagation(self, input, expected, outputForward, alpha = 1):
-        print(outputForward)
+    def backwardPropagation(self, input, expected, outputForward, alpha = 0.6):
         #calculate sum of errors (global error) between expected and output
         errorSum = _sum(outputForward, expected)  #Cost function
-        divErrorSum = 0
-        for i in range(len(outputForward)):
-            divErrorSum += _sum(outputForward[i], expected[i], True)
-        # print(divErrorSum)
+        print("errorSum:", errorSum)
 
         #weights hidden to output modifications
         weightsHtOBeforeChange = np.copy(self.weightsHiddenToOutput)  # needed for next layer calculations
@@ -96,13 +84,9 @@ class Network:
         # modifyHiddenToOutputWeights :  rows = hidden, col = output
         for row in range(self.hiddenNumber):
             for col in range(self.outputNumber):
-                # equation from mattmazur.com, calculate pochodna E_total po wadze
                 change = -1 * (expected[col] - outputForward[col]) * outputForward[col] * (1 - outputForward[col]) * self.weightsHiddenToOutput[row][col]
                 self.weightsHiddenToOutput[row][col] -= alpha * change  # weight modification (hidden to output)
 
-        # sum of output neuron is a sum of values in single column
-        sumOfWeightsHiddenProduct = np.sum(np.copy(self.weightsHiddenToOutput), axis=1)
-        print(sumOfWeightsHiddenProduct)
 
         #weights input to hidden modifications
         modifyInputToHiddenWeights = np.copy(self.weightsInputToHidden)
@@ -111,28 +95,20 @@ class Network:
         # weights used here are weightsHtOBeforeChange, NOT self.weightsHiddenToOutput (which is modified at this point)
         for row in range(self.inputNumber):
             for col in range(self.hiddenNumber):
-
+                change = 0
                 for outputIter in range(self.outputNumber):
-                    x = -1 * (expected[outputIter] - outputForward[outputIter]) * outputForward[outputIter] * (1 - outputForward[outputIter])
-                    # y =
+                    x = -1 * (expected[outputIter] - outputForward[outputIter]) * outputForward[outputIter] * (1 - outputForward[outputIter]) * self.weightsInputToHidden[row][col]
+                    y = self.sumOfWeightsInputProduct[col] * (1 - self.sumOfWeightsInputProduct[col])
+                    z = input[row]
+                    self.weightsInputToHidden[row][col] -= alpha * x * y * z
 
-
-        # for weightRowIter in range(len(modifyInputToHiddenWeights)):
-        #     for weightColIter in range(len(modifyInputToHiddenWeights[0])):
-        #         modifyInputToHiddenWeights[weightRowIter][weightColIter] = _sigmoid(self.sumOfWeightsInputProduct[weightColIter], True)
-        #         modifyInputToHiddenWeights[weightRowIter][weightColIter] *= sumOfWeightsHiddenProduct[weightColIter % 2]
-        #         modifyInputToHiddenWeights[weightRowIter][weightColIter] *= input[weightColIter]
-
-        self.weightsInputToHidden -= modifyInputToHiddenWeights * alpha
-        #print(modifyInputToHiddenWeights)
-
-
-    def train(self, input, expected):
-        output = self.forwardPropagation(input)
-        self.backwardPropagation(input, expected, output)
 
     def trainNew(self, input, expected, epochNum):
+        errorsOfEpoch = []
         for i in range(epochNum):
             for j in range(len(input)):
-                output = self.forwardPropagation(input[j])
-                self.backwardPropagation(input[j], expected[j], output)
+                output = self.forwardPropagation(input[j], -0.6, -0.6)
+                self.backwardPropagation(input[j], _castClassNamesToZerosOnesArray(expected[j]), output)
+                # print("hw:",self.weightsInputToHidden)
+        return errorsOfEpoch
+
