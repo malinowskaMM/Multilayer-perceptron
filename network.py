@@ -130,11 +130,18 @@ class Network:
         # print("oGreen", oGreen)  # wartosci w output gdy staja sie zielone w PDF
 
         # wagi H-O += krok * wartosci w neuronach o(?) * h_out
+
         if self.outputNumber == 1:
-            self.weightsHiddenToOutput += alpha * oGreen * self.sigmoidSumOfWeightsInputProduct
+            oIncrement = alpha * oGreen * self.sigmoidSumOfWeightsInputProduct
+            self.weightsHiddenToOutput += oIncerement + self.momentum *  self.weightHToOIncrement
+            self.weightHToOIncrement = oIncrement
         else:
             for i in range(self.hiddenNumber):
-                self.weightsHiddenToOutput[i] += alpha * np.sum(oGreen) * self.sigmoidSumOfWeightsInputProduct[i]
+                oIncrement = alpha * np.sum(oGreen) * self.sigmoidSumOfWeightsInputProduct[i]
+                self.weightsHiddenToOutput[i] += oIncrement + self.momentum[i] *  self.weightHToOIncrement
+                self.weightHToOIncrement = oIncrement
+
+
         # print("self.weightsHiddenToOutput", self.weightsHiddenToOutput)
 
         # wagi I-H += krok * wartosci w neuronach h(?) * Input
