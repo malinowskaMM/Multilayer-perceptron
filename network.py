@@ -6,10 +6,9 @@ def _sigmoid(x, deriv=False):
         return x * (1 - x)  # pochodna funkcji aktywacji
     return 1 / (1 + np.exp(-x))  # funkcja aktywacji - sigmoida
 
-
-def _sum(outputForward, expected ,deriv=False):
+def _sum(outputForward, expected, deriv=False):
     errorSum = 0
-    if deriv is True: #outputForward and expected as number not array
+    if deriv is True:  # outputForward and expected as number not array
         return (expected - outputForward) * (-1)
     for i in range(len(outputForward)):
         errorSum += (expected[i] - outputForward[i]) ** 2
@@ -57,6 +56,8 @@ class Network:
         self.weightIToHIncrement = np.zeros((self.inputNumber, self.hiddenNumber))
         self.weightHToOIncrement = np.zeros((self.hiddenNumber, self.outputNumber))
 
+
+
     def forwardPropagation(self, input, biasH=0, biasO=0, testingStats=None, testingMode=False):
         # single row contains weights for one hidden neuron
 
@@ -76,12 +77,14 @@ class Network:
         for elementIter in range(len(productOfWeightsAndHidden)):
             productOfWeightsAndHidden[elementIter] *= self.sigmoidSumOfWeightsInputProduct[elementIter]
             # productOfWeightsAndHidden[elementIter] += biasO
-        # sum of output neuron is a sum of values in single column
+        # sum of output neuron is a sum of values in single column - net o
         self.sumOfWeightsHiddenProduct = np.sum(productOfWeightsAndHidden,
                                                 axis=0)  # vector of inputs into output neurons
 
         # for each sum we use sigmoid function - out o
         sigmoidSumOfWeightsHiddenProduct = _sigmoid(self.sumOfWeightsHiddenProduct)
+
+        print("output:", sigmoidSumOfWeightsHiddenProduct)
 
         if testingMode:
             testingStats.append(input)  # wzorzec wejsciowy
@@ -93,63 +96,63 @@ class Network:
         return sigmoidSumOfWeightsHiddenProduct
 
 
-    def backwardPropagationOld(self, input, expected, outputForward, epochNumber, errorsOfEpoch, alpha=1):
+    def backwardPropagation(self, input, expected, outputForward, epochNumber, errorsOfEpoch, alpha=0.1):
         # calculate sum of errors (global error) between expected and output
         # errorSum = _sum(outputForward, expected)  # Cost function
         # if epochNumber % 10 == 0:
         #     if errorsOfEpoch is not None:
         #         errorsOfEpoch.append(errorSum)
 
+        # print("errorSum:", errorSum)
         errorsArray = expected - outputForward
         for i in range(len(errorsArray)):
             errorsArray[i] *= _sigmoid(errorsArray[i], True)
 
-        weightsHiddenToOutputModification = np.copy(self.weightsHiddenToOutput)
-        for row in range(len(weightsHiddenToOutputModification)):
-            for col in range(len(weightsHiddenToOutputModification[0])):
-                weightsHiddenToOutputModification[row][col] *= errorsArray[row]
-        # for row in range(len(weightsHiddenToOutputModification)):
-        #         weightsHiddenToOutputModification[row] *= errorsArray
-        print(weightsHiddenToOutputModification)
+        # print("errorsArray", errorsArray)  # d najprawsze (w PDF 0.5343)
+
+        weightsHiddenToOutputModification = np.copy(self.weightsHiddenToOutput)  # oryginalne wagi
+        # print("weightsHiddenToOutputModification", weightsHiddenToOutputModification)
+
+        weightsHiddenToOutputModification *= errorsArray
+        # print("weightsHiddenToOutputModification", weightsHiddenToOutputModification)  # d (PDF)
+
+        hGreen = np.zeros(self.hiddenNumber)
+        if self.outputNumber == 1:
+            hGreen = self.sumOfWeightsInputProduct * weightsHiddenToOutputModification
+        else:
+            for i in range(self.hiddenNumber):
+                hGreen[i] = self.sumOfWeightsInputProduct[i] * np.sum(weightsHiddenToOutputModification[:, i])
+        # print("hGreen", hGreen)  # wartosci w hidden gdy staja sie zielone w PDF
+
+        oGreen = self.sumOfWeightsHiddenProduct * errorsArray
+        # print("oGreen", oGreen)  # wartosci w output gdy staja sie zielone w PDF
+
+        # wagi H-O += krok * wartosci w neuronach o(?) * h_out
+        if self.outputNumber == 1:
+            self.weightsHiddenToOutput += alpha * oGreen * self.sigmoidSumOfWeightsInputProduct
+        else:
+            for i in range(self.hiddenNumber):
+                self.weightsHiddenToOutput[i] += alpha * np.sum(oGreen) * self.sigmoidSumOfWeightsInputProduct[i]
+        # print("self.weightsHiddenToOutput", self.weightsHiddenToOutput)
+
+        # wagi I-H += krok * wartosci w neuronach h(?) * Input
+        # print("self.weightsInputToHidden1", self.weightsInputToHidden)
+
+        for i in range(self.hiddenNumber):
+            self.weightsInputToHidden[:, i] += alpha * hGreen[i] * input
+        # print("self.weightsInputToHidden2", self.weightsInputToHidden)
 
 
-        modifyWeightsHiddenToOutput = np.copy(self.weightsHiddenToOutput)
-        print(modifyWeightsHiddenToOutput)
-        for row in range(len(modifyWeightsHiddenToOutput)):
-            for col in range(len(modifyWeightsHiddenToOutput[0])):
-                modifyWeightsHiddenToOutput[row][col] += modifyWeightsHiddenToOutput[row][col] * weightsHiddenToOutputModification[row][col] * errorsArray[col]
-
-        self.weightsHiddenToOutput = modifyWeightsHiddenToOutput
-        print(modifyWeightsHiddenToOutput)
-
-
-        # modifySigmoidSumOfWeightsInputProduct = np.copy(self.sigmoidSumOfWeightsInputProduct)
-        # print(modifySigmoidSumOfWeightsInputProduct)
-        # for row in range(len(modifySigmoidSumOfWeightsInputProduct)):
-        #         modifySigmoidSumOfWeightsInputProduct[row] = _sigmoid(modifySigmoidSumOfWeightsInputProduct[row], True)
-        #         modifySigmoidSumOfWeightsInputProduct[row] *= weightsHiddenToOutputModification[row][col]
-        #
-        # print(modifySigmoidSumOfWeightsInputProduct)
-        #
-        # modifyWeightsInputToHidden = np.copy(self.weightsInputToHidden)
-        # for row in range(len(modifyWeightsInputToHidden)):
-        #     for col in range(len(modifyWeightsInputToHidden[0])):
-        #         modifyWeightsInputToHidden[row][col] += modifyWeightsInputToHidden[row][col] * modifySigmoidSumOfWeightsInputProduct[col] * input[row]
-        #
-        # print(modifyWeightsInputToHidden)
-
-
-    def trainOne(self, input, expected):
+    def trainOne(self, input, expected, epochNum):
         output = self.forwardPropagation(input)
-        self.backwardPropagationOld(input, expected, output, 1,
-                                    None)
+        self.backwardPropagation(input, expected, output, epochNum, None)
 
     def trainNew(self, input, expected, epochNum):
         errorsOfEpoch = []
         for i in range(epochNum):
             for j in range(len(input)):
                 output = self.forwardPropagation(input[j])
-                self.backwardPropagationOld(input[j], _castClassNamesToZerosOnesArray(expected[j]), output, epochNum, errorsOfEpoch)
+                self.backwardPropagation(input[j], _castClassNamesToZerosOnesArray(expected[j]), output, epochNum, errorsOfEpoch)
         return errorsOfEpoch
 
     def testingOne(self, input, expected):

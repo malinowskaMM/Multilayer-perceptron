@@ -12,7 +12,7 @@ def train(net, input, expected, epochNum):
             output = net.forwardPropagation(input[order[j]])
             if i % 20 == 0:
                 print(output)
-            net.backwardPropagationOld(input[order[j]], expected[order[j]], output, i, None)
+            net.backwardPropagation(input[order[j]], expected[order[j]], output, i, None)
 
 data = np.asarray(
          [[1, 0, 0, 0],
@@ -21,7 +21,7 @@ data = np.asarray(
           [0, 0, 0, 1]])
 
 mlp = nt.Network(4, 2, 4, momentum=0.6)
-train(mlp, data, data, 1000)
+train(mlp, data, data, 10)
 print("hidden neurons output:", mlp.sigmoidSumOfWeightsInputProduct)
 result = mlp.forwardPropagation(data[0])
 print("input:", data[0])
