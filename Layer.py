@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Layer:
     def __init__(self, inputNum, outputNum):
         self.input = None
@@ -14,8 +15,8 @@ class Layer:
         self.input = input
         return np.dot(self.weights, self.input) + self.bias
 
-    def backward(self, outputFunc, alpha):
-        weightsChange = np.dot(outputFunc, self.input.T)
+    def backward(self, outputDiff, alpha):
+        weightsChange = np.dot(outputDiff, self.input.T)
         self.weights -= alpha * weightsChange
-        self.bias -= alpha * outputFunc
-        return np.dot(self.weights.T, outputFunc)
+        self.bias -= alpha * outputDiff
+        return np.dot(self.weights.T, outputDiff)
